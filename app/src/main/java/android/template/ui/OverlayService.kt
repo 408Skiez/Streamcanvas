@@ -1,4 +1,4 @@
-package android.template.ui
+package android.template.ui // Pastikan package ini sesuai
 
 import android.app.Service
 import android.content.Intent
@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner // INI YANG SEBELUMNYA KURANG
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
