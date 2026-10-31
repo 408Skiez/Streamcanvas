@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.template.ui
+package android.template.ui // Harus sama persis dengan MainActivity di atas
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
