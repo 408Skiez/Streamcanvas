@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package android.template.ui // Harus sama persis dengan MainActivity di atas
+package android.template.ui // Sesuaikan jika berbeda
 
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -29,6 +32,37 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    var currentScreen by remember { mutableStateOf("HOME") }
+
+                    when (currentScreen) {
+                        "HOME" -> HomeScreen(
+                            onSelectCanvas = { currentScreen = "CANVAS" },
+                            onSelectSender = { currentScreen = "SENDER" }
+                        )
+                        "CANVAS" -> CanvasScreen(
+                            onBack = { currentScreen = "HOME" }
+                        )
+                        "SENDER" -> SenderScreen(
+                            onBack = { currentScreen = "HOME" }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// --- SEMUA LAYAR ADA DI SINI SEKARANG ---
 
 @Composable
 fun HomeScreen(onSelectCanvas: () -> Unit, onSelectSender: () -> Unit) {
