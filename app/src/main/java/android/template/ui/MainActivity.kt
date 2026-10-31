@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     var hasOverlayPermission by remember { mutableStateOf(checkOverlayPermission()) }
-                    val context = LocalContext.current // Alat untuk memanggil Service
+                    val context = LocalContext.current
 
                     Column(
                         modifier = Modifier.fillMaxSize(),
@@ -68,7 +68,6 @@ class MainActivity : ComponentActivity() {
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(
                                 onClick = {
-                                    // PERINTAH MENYALAKAN OVERLAY SERVICE
                                     val intent = Intent(context, OverlayService::class.java)
                                     context.startService(intent)
                                 },
