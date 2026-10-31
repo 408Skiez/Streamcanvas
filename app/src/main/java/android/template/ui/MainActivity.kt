@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.template.ui // Sesuaikan jika package aslimu berbeda
+package android.template.ui
 
 import android.content.Intent
 import android.net.Uri
@@ -28,6 +28,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
@@ -40,6 +41,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     var hasOverlayPermission by remember { mutableStateOf(checkOverlayPermission()) }
+                    val context = LocalContext.current // Alat untuk memanggil Service
 
                     Column(
                         modifier = Modifier.fillMaxSize(),
@@ -65,7 +67,11 @@ class MainActivity : ComponentActivity() {
                             Text("✅ Izin Overlay Diberikan!", color = MaterialTheme.colorScheme.primary)
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(
-                                onClick = { /* Nanti kita panggil Service Overlay di sini */ },
+                                onClick = {
+                                    // PERINTAH MENYALAKAN OVERLAY SERVICE
+                                    val intent = Intent(context, OverlayService::class.java)
+                                    context.startService(intent)
+                                },
                                 modifier = Modifier.fillMaxWidth(0.8f).height(60.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                             ) {
@@ -78,7 +84,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // Fungsi untuk mengecek apakah izin sudah diberikan
     private fun checkOverlayPermission(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             Settings.canDrawOverlays(this)
@@ -87,7 +92,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // Fungsi untuk membuka menu pengaturan izin
     private fun requestOverlayPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val intent = Intent(
