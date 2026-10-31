@@ -1,8 +1,7 @@
-package android.template.ui
+package android.template.ui // Pastikan package ini sesuai
 
 import android.app.Service
 import android.content.Intent
-import android.content.pm.ActivityInfo
 import android.graphics.PixelFormat
 import android.os.IBinder
 import android.view.Gravity
@@ -11,23 +10,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleOwner // INI YANG SEBELUMNYA KURANG
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
@@ -43,12 +36,10 @@ class OverlayService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedStat
     private lateinit var windowManager: WindowManager
     private lateinit var composeView: ComposeView
 
+    // Pengaturan wajib agar Compose bisa berjalan di luar Activity
     private val lifecycleRegistry = LifecycleRegistry(this)
     private val store = ViewModelStore()
     private val savedStateRegistryController = SavedStateRegistryController.create(this)
-
-    private var saweriaUrl: String = ""
-    private var isLandscape: Boolean = true
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -62,6 +53,7 @@ class OverlayService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedStat
         super.onCreate()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 
+        // Inisialisasi Lifecycle agar Compose aktif
         savedStateRegistryController.performRestore(null)
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
@@ -74,25 +66,20 @@ class OverlayService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedStat
             
             setContent {
                 MaterialTheme {
-                    OverlayCanvas(
-                        saweriaUrl = saweriaUrl,
-                        onClose = { stopSelf() }
-                    )
+                    OverlayCanvas(onClose = { stopSelf() })
                 }
             }
         }
 
-        val screenOrientation = if (isLandscape) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-
+        // Pengaturan Jendela Overlay
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT, // Memenuhi seluruh layar!
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            screenOrientation = screenOrientation // Force orientation
         }
 
         windowManager.addView(composeView, params)
@@ -111,95 +98,80 @@ class OverlayService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedStat
     override val viewModelStore: ViewModelStore get() = store
 }
 
+// --- KOMPONEN UI COMPOSE (Mirip seperti di Fase 1) ---
+
 @Composable
-fun OverlayCanvas(saweriaUrl: String, onClose: () -> Unit) {
+fun OverlayCanvas(onClose: () -> Unit) {
     var isCleanMode by remember { mutableStateOf(false) }
-    var isMenuOpen by remember { mutableStateOf(false) }
+    var showCamera by remember { mutableStateOf(true) }
+    var showWebAlert by remember { mutableStateOf(true) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        
-        // Web Alert Layer (Placeholder for WebView)
-        DraggableLayer(initialX = 100f, initialY = 100f) {
-            Box(modifier = Modifier
-                .size(250.dp, 100.dp)
-                .border(if (isCleanMode) 0.dp else 2.dp, Color.Green, RoundedCornerShape(8.dp))
-                .background(if (isCleanMode) Color.Transparent else Color.Green.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
-            ) {
-                if (!isCleanMode) {
-                    Column(modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Web Alert Area", color = Color.Green, style = MaterialTheme.typography.labelSmall)
-                        if(saweriaUrl.isNotEmpty()) {
-                            Text("URL Loaded", color = Color.Green, style = MaterialTheme.typography.labelSmall)
-                        } else {
-                            Text("No URL", color = Color.Red, style = MaterialTheme.typography.labelSmall)
-                        }
+    Box(modifier = Modifier.fillMaxSize()) { // Background sekarang TRANSPARAN!
+
+        if (showWebAlert) {
+            DraggableLayer {
+                Box(modifier = Modifier
+                    .size(200.dp, 200.dp)
+                    .border(if (isCleanMode) 0.dp else 2.dp, Color.Green)
+                    .background(if (isCleanMode) Color.Transparent else Color.Green.copy(alpha = 0.2f))
+                ) {
+                    if (!isCleanMode) {
+                        Text("Web Alert", color = Color.Green, modifier = Modifier.align(Alignment.Center))
                     }
                 }
             }
         }
 
-        // Camera Layer (Placeholder for CameraX)
-        DraggableLayer(initialX = 100f, initialY = 300f) {
-            Box(modifier = Modifier
-                .size(120.dp, 160.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .border(if (isCleanMode) 0.dp else 2.dp, Color.Red, RoundedCornerShape(16.dp))
-                .background(if (isCleanMode) Color.Transparent else Color.Red.copy(alpha = 0.2f))
-            ) {
-                if (!isCleanMode) {
-                    Text("Kamera", color = Color.Red, modifier = Modifier.align(Alignment.Center))
+        if (showCamera) {
+            DraggableLayer {
+                Box(modifier = Modifier
+                    .size(120.dp, 160.dp)
+                    .border(if (isCleanMode) 0.dp else 2.dp, Color.Red)
+                    .background(if (isCleanMode) Color.Transparent else Color.Red.copy(alpha = 0.2f)) // Transparan saat Clean Mode sementara belum ada kamera asli
+                ) {
+                    if (!isCleanMode) {
+                        Text("Kamera", color = Color.Red, modifier = Modifier.align(Alignment.Center))
+                    }
                 }
             }
         }
 
-        // Floating Action Button (Controller)
-        DraggableLayer(initialX = 800f, initialY = 100f) {
-            Column(horizontalAlignment = Alignment.End) {
-                if (isMenuOpen && !isCleanMode) {
-                    Card(
-                        modifier = Modifier.padding(bottom = 8.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f))
-                    ) {
-                        Column(modifier = Modifier.padding(8.dp)) {
-                            Button(onClick = { isCleanMode = true }, colors = ButtonDefaults.buttonColors(containerColor = Color.Red)) {
-                                Text("🔴 GO LIVE (Clean)")
-                            }
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Button(onClick = onClose, colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
-                                Text("TUTUP OVERLAY")
-                            }
-                        }
-                    }
+        if (!isCleanMode) {
+            Column(modifier = Modifier.align(Alignment.TopEnd).padding(16.dp).background(Color.Black.copy(alpha = 0.5f)).padding(8.dp)) {
+                Button(onClick = { showCamera = !showCamera }) { Text(if (showCamera) "Tutup Kamera" else "Buka Kamera") }
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(onClick = { showWebAlert = !showWebAlert }) { Text(if (showWebAlert) "Tutup Alert" else "Buka Alert") }
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(
+                    onClick = { isCleanMode = true },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) {
+                    Text("🔴 GO LIVE")
                 }
-                
-                if (isCleanMode) {
-                     SmallFloatingActionButton(
-                        onClick = { isCleanMode = false },
-                        containerColor = Color.White.copy(alpha = 0.3f),
-                        contentColor = Color.White
-                    ) {
-                        Icon(Icons.Default.Build, contentDescription = "Edit")
-                    }
-                } else {
-                    FloatingActionButton(
-                        onClick = { isMenuOpen = !isMenuOpen },
-                        containerColor = MaterialTheme.colorScheme.primary
-                    ) {
-                        Icon(if (isMenuOpen) Icons.Default.Close else Icons.Default.Build, contentDescription = "Menu")
-                    }
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(onClick = onClose, colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
+                    Text("TUTUP APP")
                 }
+            }
+        } else {
+            Button(
+                onClick = { isCleanMode = false },
+                modifier = Modifier.align(Alignment.TopEnd).padding(8.dp).size(50.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.2f))
+            ) {
+                Text("X", color = Color.White)
             }
         }
     }
 }
 
 @Composable
-fun DraggableLayer(initialX: Float = 0f, initialY: Float = 0f, content: @Composable () -> Unit) {
-    var offsetX by remember { mutableStateOf(initialX) }
-    var offsetY by remember { mutableStateOf(initialY) }
+fun DraggableLayer(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    var offsetX by remember { mutableStateOf(0f) }
+    var offsetY by remember { mutableStateOf(0f) }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
             .pointerInput(Unit) {
                 detectDragGestures { change, dragAmount ->

@@ -42,13 +42,41 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    DashboardScreen(
-                        hasPermission = hasOverlayPermission,
-                        onRequestPermission = { requestOverlayPermission() },
-                        onStartOverlay = { saweriaUrl, isLandscape ->
-                            val intent = Intent(this, OverlayService::class.java).apply {
-                                putExtra("SAWERIA_URL", saweriaUrl)
-                                putExtra("IS_LANDSCAPE", isLandscape)
+                    var hasOverlayPermission by remember { mutableStateOf(checkOverlayPermission()) }
+                    val context = LocalContext.current
+
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text("STREAMCANVAS", style = MaterialTheme.typography.headlineLarge)
+                        Text("Standalone Overlay Mode", style = MaterialTheme.typography.bodyLarge)
+                        
+                        Spacer(modifier = Modifier.height(32.dp))
+
+                        if (!hasOverlayPermission) {
+                            Text("Aplikasi butuh izin untuk mengambang di atas game.", color = MaterialTheme.colorScheme.error)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(onClick = { requestOverlayPermission() }) {
+                                Text("Berikan Izin Overlay")
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(onClick = { hasOverlayPermission = checkOverlayPermission() }) {
+                                Text("Saya Sudah Beri Izin (Refresh)")
+                            }
+                        } else {
+                            Text("✅ Izin Overlay Diberikan!", color = MaterialTheme.colorScheme.primary)
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(
+                                onClick = {
+                                    val intent = Intent(context, OverlayService::class.java)
+                                    context.startService(intent)
+                                },
+                                modifier = Modifier.fillMaxWidth(0.8f).height(60.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                            ) {
+                                Text("🚀 TAMPILKAN LAYOUT KANVAS")
                             }
                             startService(intent)
                             finish() // Tutup dashboard setelah overlay jalan
